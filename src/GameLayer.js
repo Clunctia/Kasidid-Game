@@ -8,7 +8,10 @@ var GameLayer = cc.LayerColor.extend({
     var enemy = new Enemy();
     enemy.setPosition(new cc.Point(400,200));
     this.addChild(enemy);
-    
+    var object = new Objects();
+    object.setPosition(new cc.Point(300,300));
+    this.addChild(object);
+
     return true;
   }
 });

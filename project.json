@@ -14,6 +14,9 @@
     "jsList" : [
         "src/resource.js",
         "src/GameLayer.js",
-        "src/Character.js"
+        "src/Enemy.js",
+        "src/Character.js",
+        "src/Object.js",
+        "src/Goal.js",
     ]
 }
