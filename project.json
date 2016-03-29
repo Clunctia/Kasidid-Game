@@ -16,7 +16,7 @@
         "src/GameLayer.js",
         "src/Enemy.js",
         "src/Character.js",
-        "src/Object.js",
-        "src/Goal.js",
+        "src/Objects.js",
+        "src/Goal.js"
     ]
 }
