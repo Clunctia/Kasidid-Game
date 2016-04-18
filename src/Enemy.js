@@ -1,19 +1,19 @@
 var Enemy = cc.Sprite.extend({
   ctor:function(){
       this._super();
-      this.initWithFile('res/images/Enemy.png');
+      this.initWithFile( 'res/images/Enemy.png' );
+      this.vx = Enemy.VELOCITY;
+      
   },
-  update: function(){
-    var pos = this.getPosition();
-    var check = true;
-    while(true){
-      if(check){
 
-      }
-      else{
-        
-      }
-    }
+  update: function( dt ) {
+
+  },
+
+  checkEnemyPosition: function() {
+
   }
 
 });
+
+Enemy.VELOCITY = 15;
