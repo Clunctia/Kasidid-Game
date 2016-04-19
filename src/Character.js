@@ -49,7 +49,7 @@ var Character = cc.Sprite.extend({
       spriteRect.y + dY,
       spriteRect.width,
       spriteRect.height );
-    },
+  },
 
   update: function() {
     var currentPositionRect = this.getPlayerRect();
@@ -184,7 +184,7 @@ var Character = cc.Sprite.extend({
     },
 
     shootMagic: function() {
-      
+
     },
 
 });
