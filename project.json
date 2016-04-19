@@ -17,6 +17,7 @@
         "src/Enemy.js",
         "src/Character.js",
         "src/Objects.js",
-        "src/Goal.js"
+        "src/Goal.js",
+        "src/Block.js"
     ]
 }

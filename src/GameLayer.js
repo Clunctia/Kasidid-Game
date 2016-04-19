@@ -11,6 +11,8 @@ var GameLayer = cc.LayerColor.extend({
 
     this.addKeyboardHandlers();
 
+    this.scheduleUpdate();
+
     return true;
   },
 
@@ -30,45 +32,45 @@ var GameLayer = cc.LayerColor.extend({
     }, this );
   },
 
-  addCharacter: function(){
-    this.char = new Character(  );
-
-    this.char.setPosition( new cc.Point( 200, 200 ) );
+  addCharacter: function() {
+    this.char = new Character( 200, 160 );
+    this.char.setBlocks( this.blocks );
     this.addChild( this.char );
+    this.scheduleOnce( function() {
+      this.char.scheduleUpdate();
+    }, 1);
   },
 
-  addEnemies: function(){
-    this.enemy = new Enemy();
-    this.enemy.setPosition( new cc.Point( 400, 200 ) );
+  addEnemies: function() {
+    this.enemy = new Enemy( 400, 200 );
     this.addChild( this.enemy );
     this.enemy.scheduleUpdate();
   },
 
-  addObstracle: function(){
+  addObstracle: function() {
     this.obstracle = new Objects();
     this.obstracle.setPosition( new cc.Point( 300, 300 ) );
     this.addChild( this.obstracle );
   },
 
-  onKeyDown: function( keyCode, event ){
-    console.log('Down: ' + keyCode.toString());
+  onKeyDown: function( keyCode, event ) {
     this.char.handleKeyDown( keyCode );
   },
 
-  onKeyUp: function( keyCode, event ){
+  onKeyUp: function( keyCode, event ) {
     this.char.handleKeyUp( keyCode );
   },
 
-  addKeyboardHandlers: function(){
+  addKeyboardHandlers: function() {
     var self = this;
     cc.eventManager.addListener({
       event: cc.EventListener.KEYBOARD,
 
-      onKeyPressed: function( keyCode, event ){
+      onKeyPressed: function( keyCode, event ) {
         self.onKeyDown( keyCode, event );
       },
 
-      onKeyReleased: function( keyCode, event ){
+      onKeyReleased: function( keyCode, event ) {
         self.onKeyUp( keyCode, event );
       }
     }, this);

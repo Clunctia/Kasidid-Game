@@ -1,29 +1,37 @@
 var Character = cc.Sprite.extend({
   ctor: function( x, y ){
     this._super();
-    this.initWithFile('res/images/Character.png');
-    this.setAnchorPoint();
+    this.initWithFile( 'res/images/Character.png' );
+    this.setAnchorPoint( cc.p( 0.5, 0 ) );
     this.x = x;
     this.y = y;
 
-    this.maxVx = 6;
-    this.accX = 0.25;
-    this.backAccX = 0.5;
-    this.jumpV = 10;
-    this.g = -1;
+    this.setCharacterVelocity();
 
     this.vx = 0;
     this.vy = 0;
 
-    this.moveLeft = false;
-    this.moveRight = false;
-    this.jump = false;
+    this.setCharacterMoveAble();
 
     this.ground = null;
 
     this.blocks = [];
 
     this.updateSpritePosition();
+  },
+
+  setCharacterVelocity: function(){
+    this.maxVx = 6;
+    this.accX = 0.25;
+    this.backAccX = 0.5;
+    this.jumpV = 20;
+    this.g = -1;
+  },
+
+  setCharacterMoveAble: function(){
+    this.moveLeft = false;
+    this.moveRight = false;
+    this.jump = false;
   },
 
   updateSpritePosition: function(){
@@ -43,151 +51,145 @@ var Character = cc.Sprite.extend({
       spriteRect.height );
     },
 
-    update: function() {
-      var currentPositionRect = this.getPlayerRect();
+  update: function() {
+    var currentPositionRect = this.getPlayerRect();
 
-      this.updateYMovement();
-      this.updateXMovement();
+    this.updateYMovement();
+    this.updateXMovement();
 
-      var newPositionRect = this.getPlayerRect();
-      this.handleCollision( currentPositionRect,
-        newPositionRect );
+    var newPositionRect = this.getPlayerRect();
+    this.handleCollision( currentPositionRect,
+                          newPositionRect );
 
-        this.updateSpritePosition();
+    this.updateSpritePosition();
+  },
+
+  updateXMovement: function() {
+    if ( this.ground ) {
+      if ( ( !this.moveLeft ) && ( !this.moveRight ) ) {
+        this.autoDeaccelerateX();
+      } else if ( this.moveRight ) {
+        this.accelerateX( 1 );
+      } else {
+        this.accelerateX( -1 );
+      }
+    }
+    this.x += this.vx;
+    if ( this.x < 0 ) {
+      this.x += screenWidth;
+    }
+    if ( this.x > screenWidth ) {
+      this.x -= screenWidth;
+    }
+  },
+
+  updateYMovement: function() {
+    if ( this.ground ) {
+      this.vy = 0;
+      if ( this.jump ) {
+        this.vy = this.jumpV;
+        this.y = this.ground.getTopY() + this.vy;
+        this.ground = null;
+      }
+    } else {
+      this.vy += this.g;
+      this.y += this.vy;
+    }
+  },
+
+  isSameDirection: function( dir ) {
+    return ( ( ( this.vx >=0 ) && ( dir >= 0 ) ) ||
+      ( ( this.vx <= 0 ) && ( dir <= 0 ) ) );
+  },
+
+  accelerateX: function( dir ) {
+    if ( this.isSameDirection( dir ) ) {
+      this.vx += dir * this.accX;
+      if ( Math.abs( this.vx ) > this.maxVx ) {
+        this.vx = dir * this.maxVx;
+      }
+    } else {
+      if ( Math.abs( this.vx ) >= this.backAccX ) {
+        this.vx += dir * this.backAccX;
+      } else {
+        this.vx = 0;
+      }
+    }
+  },
+
+  autoDeaccelerateX: function() {
+    if ( Math.abs( this.vx ) < this.accX ) {
+      this.vx = 0;
+    } else if ( this.vx > 0 ) {
+      this.vx -= this.accX;
+    } else {
+      this.vx += this.accX;
+    }
+  },
+
+  handleCollision: function( oldRect, newRect ) {
+    if ( this.ground ) {
+        if ( !this.ground.onTop( newRect ) ) {
+        this.ground = null;
+      }
+    } else {
+      if ( this.vy <= 0 ) {
+        var topBlock = this.findTopBlock( this.blocks,
+          oldRect,
+          newRect );
+
+          if ( topBlock ) {
+            this.ground = topBlock;
+            this.y = topBlock.getTopY();
+            this.vy = 0;
+          }
+        }
+      }
+    },
+
+    findTopBlock: function( blocks, oldRect, newRect ) {
+      var topBlock = null;
+      var topBlockY = -1;
+
+      blocks.forEach( function( b ) {
+        if ( b.hitTop( oldRect, newRect ) ) {
+          if ( b.getTopY() > topBlockY ) {
+            topBlockY = b.getTopY();
+            topBlock = b;
+          }
+        }
+      }, this );
+
+      return topBlock;
+    },
+
+    handleKeyDown: function( keyCode ) {
+      if ( Character.KEYMAP[ keyCode ] != undefined ) {
+        this[ Character.KEYMAP[ keyCode ] ] = true;
+      }
+   },
+
+    handleKeyUp: function( keyCode ) {
+      if ( Character.KEYMAP[ keyCode ] != undefined ) {
+        this[ Character.KEYMAP[ keyCode ] ] = false;
+       }
       },
 
-      updateXMovement: function() {
-        if ( this.ground ) {
-          if ( ( !this.moveLeft ) && ( !this.moveRight ) ) {
-            this.autoDeaccelerateX();
-          } else if ( this.moveRight ) {
-            this.accelerateX( 1 );
-          } else {
-            this.accelerateX( -1 );
-          }
-        }
-        this.x += this.vx;
-        if ( this.x < 0 ) {
-          this.x += screenWidth;
-        }
-        if ( this.x > screenWidth ) {
-          this.x -= screenWidth;
-        }
-      },
+    setBlocks: function( blocks ) {
+      this.blocks = blocks;
+    },
 
-      updateYMovement: function() {
-        if ( this.ground ) {
-          this.vy = 0;
-          if ( this.jump ) {
-            this.vy = this.jumpV;
-            this.y = this.ground.getTopY() + this.vy;
-            this.ground = null;
-          }
-        } else {
-          this.vy += this.g;
-          this.y += this.vy;
-        }
-      },
+    switchDirection: function() {
 
-      isSameDirection: function( dir ) {
-        return ( ( ( this.vx >=0 ) && ( dir >= 0 ) ) ||
-        ( ( this.vx <= 0 ) && ( dir <= 0 ) ) );
-      },
+    },
 
-      accelerateX: function( dir ) {
-        if ( this.isSameDirection( dir ) ) {
-          this.vx += dir * this.accX;
-          if ( Math.abs( this.vx ) > this.maxVx ) {
-            this.vx = dir * this.maxVx;
-          }
-        } else {
-          if ( Math.abs( this.vx ) >= this.backAccX ) {
-            this.vx += dir * this.backAccX;
-          } else {
-            this.vx = 0;
-          }
-        }
-      },
+    shootMagic: function() {
+      
+    },
 
-      autoDeaccelerateX: function() {
-        if ( Math.abs( this.vx ) < this.accX ) {
-          this.vx = 0;
-        } else if ( this.vx > 0 ) {
-          this.vx -= this.accX;
-        } else {
-          this.vx += this.accX;
-        }
-      },
+});
 
-      handleCollision: function( oldRect, newRect ) {
-        if ( this.ground ) {
-          if ( !this.ground.onTop( newRect ) ) {
-            this.ground = null;
-          }
-        } else {
-          if ( this.vy <= 0 ) {
-            var topBlock = this.findTopBlock( this.blocks,
-              oldRect,
-              newRect );
-
-              if ( topBlock ) {
-                this.ground = topBlock;
-                this.y = topBlock.getTopY();
-                this.vy = 0;
-              }
-            }
-          }
-        },
-
-        findTopBlock: function( blocks, oldRect, newRect ) {
-          var topBlock = null;
-          var topBlockY = -1;
-
-          blocks.forEach( function( b ) {
-            if ( b.hitTop( oldRect, newRect ) ) {
-              if ( b.getTopY() > topBlockY ) {
-                topBlockY = b.getTopY();
-                topBlock = b;
-              }
-            }
-          }, this );
-
-          return topBlock;
-        },
-
-        handleKeyDown: function( keyCode ) {
-          if ( Character.KEYMAP[ keyCode ] != undefined ) {
-            this[ Character.KEYMAP[ keyCode ] ] = true;
-          }
-        },
-
-        handleKeyUp: function( keyCode ) {
-          if ( Character.KEYMAP[ keyCode ] != undefined ) {
-            this[ Character.KEYMAP[ keyCode ] ] = false;
-          }
-        },
-
-        setBlocks: function( blocks ) {
-          this.blocks = blocks;
-        }
-
-        switchDirection: function() {
-
-        },
-
-        jump: function() {
-          var pos = this.getPosition();
-          this.vy = Character.GRAVITY;
-          this.setPosition( new cc.Point ( pos.x, pos.y + this.vy ) );
-        },
-
-        shootMagic: function() {
-
-        },
-
-      });
-
-      Character.KEYMAP = {}
-      Character.KEYMAP[cc.KEY.left] = 'moveLeft';
-      Character.KEYMAP[cc.KEY.right] = 'moveRight';
-      Character.KEYMAP[cc.KEY.up] = 'jump';
+Character.KEYMAP = {}
+Character.KEYMAP[cc.KEY.left] = 'moveLeft';
+Character.KEYMAP[cc.KEY.right] = 'moveRight';
+Character.KEYMAP[cc.KEY.space] = 'jump';
