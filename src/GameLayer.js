@@ -7,13 +7,19 @@ var GameLayer = cc.LayerColor.extend({
 
     this.addCharacter();
     this.addEnemies();
-    this.addObstracle();
+    this.addObstacle();
 
     this.addKeyboardHandlers();
 
     this.scheduleUpdate();
 
     return true;
+  },
+
+  update: function(){
+    if( this.enemy.checkCollision( this.char ) ){
+      this.char.setPosition( 200, 160 );
+    }
   },
 
   createBlocks: function() {
@@ -42,15 +48,14 @@ var GameLayer = cc.LayerColor.extend({
   },
 
   addEnemies: function() {
-    this.enemy = new Enemy( 400, 200 );
+    this.enemy = new Enemy( 400, 160 );
     this.addChild( this.enemy );
     this.enemy.scheduleUpdate();
   },
 
-  addObstracle: function() {
-    this.obstracle = new Objects();
-    this.obstracle.setPosition( new cc.Point( 300, 300 ) );
-    this.addChild( this.obstracle );
+  addObstacle: function() {
+    this.obstacle = new Objects( 300, 300 );
+    this.addChild( this.obstacle );
   },
 
   onKeyDown: function( keyCode, event ) {

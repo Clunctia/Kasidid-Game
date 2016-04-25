@@ -2,7 +2,7 @@ var Character = cc.Sprite.extend({
   ctor: function( x, y ){
     this._super();
     this.initWithFile( 'res/images/Character.png' );
-    this.setAnchorPoint( cc.p( 0.5, 0 ) );
+    this.setAnchorPoint( cc.p( 0, 0 ) );
     this.x = x;
     this.y = y;
 
@@ -58,9 +58,7 @@ var Character = cc.Sprite.extend({
     this.updateXMovement();
 
     var newPositionRect = this.getPlayerRect();
-    this.handleCollision( currentPositionRect,
-                          newPositionRect );
-
+    this.handleCollision( currentPositionRect, newPositionRect );
     this.updateSpritePosition();
   },
 
@@ -75,11 +73,11 @@ var Character = cc.Sprite.extend({
       }
     }
     this.x += this.vx;
-    if ( this.x < 0 ) {
-      this.x += screenWidth;
+    if ( this.x < 1 ) {
+      this.x = 1;
     }
-    if ( this.x > screenWidth ) {
-      this.x -= screenWidth;
+    if ( this.x > screenWidth-1 ) {
+      this.x = screenWidth-1;
     }
   },
 
@@ -98,8 +96,7 @@ var Character = cc.Sprite.extend({
   },
 
   isSameDirection: function( dir ) {
-    return ( ( ( this.vx >=0 ) && ( dir >= 0 ) ) ||
-      ( ( this.vx <= 0 ) && ( dir <= 0 ) ) );
+    return ( ( ( this.vx >=0 ) && ( dir >= 0 ) ) ||  ( ( this.vx <= 0 ) && ( dir <= 0 ) ) );
   },
 
   accelerateX: function( dir ) {
@@ -134,9 +131,7 @@ var Character = cc.Sprite.extend({
       }
     } else {
       if ( this.vy <= 0 ) {
-        var topBlock = this.findTopBlock( this.blocks,
-          oldRect,
-          newRect );
+        var topBlock = this.findTopBlock( this.blocks, oldRect, newRect );
 
           if ( topBlock ) {
             this.ground = topBlock;
@@ -173,7 +168,7 @@ var Character = cc.Sprite.extend({
       if ( Character.KEYMAP[ keyCode ] != undefined ) {
         this[ Character.KEYMAP[ keyCode ] ] = false;
        }
-      },
+    },
 
     setBlocks: function( blocks ) {
       this.blocks = blocks;
@@ -186,6 +181,8 @@ var Character = cc.Sprite.extend({
     shootMagic: function() {
 
     },
+
+
 
 });
 
