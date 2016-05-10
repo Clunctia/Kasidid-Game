@@ -5,6 +5,8 @@ var Character = cc.Sprite.extend({
     this.setAnchorPoint( cc.p( 0, 0 ) );
     this.x = x;
     this.y = y;
+    this.beginPointX = x;
+    this.beginPointY = y;
 
     this.setCharacterVelocity();
 
@@ -16,14 +18,18 @@ var Character = cc.Sprite.extend({
     this.ground = null;
 
     this.blocks = [];
+    this.objs = [];
+    this.enemies = [];
+
+    this.scheduleUpdate();
 
     this.updateSpritePosition();
   },
 
   setCharacterVelocity: function(){
-    this.maxVx = 6;
+    this.maxVx = 10;
     this.accX = 0.25;
-    this.backAccX = 0.5;
+    this.backAccX = 0.7;
     this.jumpV = 20;
     this.g = -1;
   },
@@ -32,6 +38,7 @@ var Character = cc.Sprite.extend({
     this.moveLeft = false;
     this.moveRight = false;
     this.jump = false;
+    this.shoot = false;
   },
 
   updateSpritePosition: function(){
@@ -59,6 +66,9 @@ var Character = cc.Sprite.extend({
 
     var newPositionRect = this.getPlayerRect();
     this.handleCollision( currentPositionRect, newPositionRect );
+    for(var i = 0 ; i < this.enemies.length ; i++) {
+        this.enemyCollision( this.enemies[i] );
+    }
     this.updateSpritePosition();
   },
 
@@ -73,12 +83,6 @@ var Character = cc.Sprite.extend({
       }
     }
     this.x += this.vx;
-    if ( this.x < 1 ) {
-      this.x = 1;
-    }
-    if ( this.x > screenWidth-1 ) {
-      this.x = screenWidth-1;
-    }
   },
 
   updateYMovement: function() {
@@ -132,61 +136,107 @@ var Character = cc.Sprite.extend({
     } else {
       if ( this.vy <= 0 ) {
         var topBlock = this.findTopBlock( this.blocks, oldRect, newRect );
-
-          if ( topBlock ) {
-            this.ground = topBlock;
-            this.y = topBlock.getTopY();
-            this.vy = 0;
-          }
+        if ( topBlock ) {
+          this.ground = topBlock;
+          this.y = topBlock.getTopY();
+          this.vy = 0;
         }
       }
-    },
+    }
+  },
 
-    findTopBlock: function( blocks, oldRect, newRect ) {
-      var topBlock = null;
-      var topBlockY = -1;
+  findTopBlock: function( blocks, oldRect, newRect ) {
+    var topBlock = null;
+    var topBlockY = -1;
 
-      blocks.forEach( function( b ) {
-        if ( b.hitTop( oldRect, newRect ) ) {
-          if ( b.getTopY() > topBlockY ) {
-            topBlockY = b.getTopY();
-            topBlock = b;
-          }
+    blocks.forEach( function( b ) {
+      if ( b.hitTop( oldRect, newRect ) ) {
+        if ( b.getTopY() > topBlockY ) {
+          topBlockY = b.getTopY();
+          topBlock = b;
         }
-      }, this );
-
-      return topBlock;
-    },
-
-    handleKeyDown: function( keyCode ) {
-      if ( Character.KEYMAP[ keyCode ] != undefined ) {
-        this[ Character.KEYMAP[ keyCode ] ] = true;
       }
-   },
+    }, this );
 
-    handleKeyUp: function( keyCode ) {
-      if ( Character.KEYMAP[ keyCode ] != undefined ) {
-        this[ Character.KEYMAP[ keyCode ] ] = false;
-       }
-    },
+    return topBlock;
+  },
 
-    setBlocks: function( blocks ) {
-      this.blocks = blocks;
-    },
+  onObstacle: function( obj ) {
 
-    switchDirection: function() {
+  },
 
-    },
+  handleKeyDown: function( keyCode ) {
+    if ( Character.KEYMAP[ keyCode ] != undefined ) {
+      this[ Character.KEYMAP[ keyCode ] ] = true;
+    }
+  },
 
-    shootMagic: function() {
+  handleKeyUp: function( keyCode ) {
+    if ( Character.KEYMAP[ keyCode ] != undefined ) {
+      this[ Character.KEYMAP[ keyCode ] ] = false;
+     }
+  },
 
-    },
+  setBlocks: function( blocks ) {
+    this.blocks = blocks;
+  },
 
+  setObjs: function( objs ) {
+    this.objs = objs;
+  },
 
+  setEnemies: function( enemies ){
+    this.enemies = enemies;
+  },
+
+  switchDirection: function() {
+
+  },
+
+  fallOutStage: function(){
+    var pos = this.getPosition();
+    if( pos.y < -10 ){
+      return true;
+    }
+    return false;
+  },
+
+  wallCollision: function() {
+    var pos = this.getPosition();
+    if( pos.x < 0 ){
+      this.setPosition( pos.x + 1, pos.y );
+      this.vx = 0 ;
+    }
+    else if( pos.x > 3500 ){
+      this.setPosition( pos.x - 1, pos.y );
+      this.vx = 0;
+    }
+  },
+
+  enemyCollision: function( enemy ) {
+    var enemyPos = enemy.getPosition();
+    var charPos = this.getPosition();
+    if( (( Math.abs( enemyPos.x - charPos.x ) <= 40 ) && ( Math.abs( enemyPos.y - charPos.y ) <= 40 ) ) ){
+        this.backToStartPoint();
+    }
+  },
+
+  backToStartPoint: function(){
+    this.setPosition( this.beginPointX, this.beginPointY );
+    this.vx = 0;
+    this.vy = 0;
+  }
 
 });
 
+this.beginPointX = 0;
+this.beginPointY = 0;
 Character.KEYMAP = {}
 Character.KEYMAP[cc.KEY.left] = 'moveLeft';
 Character.KEYMAP[cc.KEY.right] = 'moveRight';
 Character.KEYMAP[cc.KEY.space] = 'jump';
+
+Character.DIR = {
+  RIGHT: 1,
+  LEFT: 2
+};

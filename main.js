@@ -52,8 +52,8 @@
  *
  */
 
- var screenWidth = 800;
- var screenHeight = 600;
+ var screenWidth = 3500;
+ var screenHeight = 3800;
 
 cc.game.onStart = function(){
     if(!cc.sys.isNative && document.getElementById("cocosLoading")) //If referenced loading.js, please remove it

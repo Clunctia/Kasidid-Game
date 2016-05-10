@@ -18,6 +18,10 @@
         "src/Character.js",
         "src/Objects.js",
         "src/Goal.js",
-        "src/Block.js"
+        "src/Magic.js",
+        "src/Block.js",
+        "src/BackGround.js",
+        "src/EndGameLayer.js",
+        "src/MenuLayer.js"
     ]
 }
